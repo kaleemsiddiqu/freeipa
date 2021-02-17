@@ -136,3 +136,23 @@ class TestUninstallWithoutDNS(IntegrationTest):
         related: https://pagure.io/freeipa/issue/8630
         """
         tasks.uninstall_master(self.master)
+
+
+class TestUninstallWithKRA(IntegrationTest):
+
+    @classmethod
+    def install(cls, mh):
+        tasks.install_master(cls.master, setup_dns=False, setup_kra=True)
+
+    def test_no_error_message_with_uninstall_ipa_with_kra(self):
+        """Test if there is no error message after IPA uninstall with KRA
+
+        There was error message in uninstall log when IPA with KRA was
+        uninstalled. This test check that there is no error message in
+        uninstall log.
+        """
+        tasks.uninstall_master(self.master)
+        ipaserver_uninstall_log = self.master.get_file_contents(
+            paths.IPASERVER_UNINSTALL_LOG, encoding='utf-8'
+        )
+        assert "Uninstallation failed" not in ipaserver_uninstall_log
